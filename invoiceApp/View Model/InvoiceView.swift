@@ -22,6 +22,7 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
         title.text = "Latest Invoices"
         return title
     }()
+    
     override init(frame: CGRect) {
         super.init(frame: .zero)
         

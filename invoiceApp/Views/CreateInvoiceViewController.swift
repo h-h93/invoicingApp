@@ -8,7 +8,15 @@
 import UIKit
 import SwiftData
 
-class CreateInvoiceViewController: UIViewController, UITextFieldDelegate {
+class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScrollViewDelegate {
+    
+    var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.backgroundColor = .clear
+        scrollView.alpha = 0.7
+        return scrollView
+    }()
     
     let titleLabel: UILabel = {
         let label = UILabel()
@@ -81,8 +89,11 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate {
         textField.attributedPlaceholder = NSAttributedString(string: "Enter phone number", attributes: [NSAttributedString.Key.foregroundColor : UIColor.systemGray])
         return textField
     }()
+    
+    
 
     let clientDBOperations = ClientDatabaseOperations()
+    var clientData: ClientDataDBModel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,48 +103,65 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate {
         
         nextButton.addTarget(self, action: #selector(createInvoice), for: .touchUpInside)
         
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        
+        nameTextField.delegate = self
+        emailTextField.delegate = self
+        phoneNumTextField.delegate = self
+        scrollView.delegate = self
+        scrollView.contentSize = CGSize(width: view.frame.size.width, height: 300)
+        
+        view.addSubview(scrollView)
         view.addSubview(titleLabel)
-        view.addSubview(fullNameLabel)
-        view.addSubview(emailLabel)
-        view.addSubview(phoneNumberLabel)
-        view.addSubview(nameTextField)
-        view.addSubview(emailTextField)
-        view.addSubview(phoneNumTextField)
-        view.addSubview(nextButton)
+        
+        scrollView.addSubview(fullNameLabel)
+        scrollView.addSubview(emailLabel)
+        scrollView.addSubview(phoneNumberLabel)
+        scrollView.addSubview(nameTextField)
+        scrollView.addSubview(emailTextField)
+        scrollView.addSubview(phoneNumTextField)
+        scrollView.addSubview(nextButton)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             titleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
             titleLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -200),
             
-            fullNameLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 50),
-            fullNameLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            fullNameLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -200),
+            scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100),
+            
+            fullNameLabel.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 50),
+            fullNameLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
+            fullNameLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -200),
             
             nameTextField.topAnchor.constraint(equalTo: fullNameLabel.bottomAnchor, constant: 15),
-            nameTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            nameTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -50),
+            nameTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
+            nameTextField.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -50),
             
             emailLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 100),
-            emailLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            emailLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -200),
+            emailLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
+            emailLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -200),
             
             emailTextField.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: 15),
-            emailTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            emailTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -50),
+            emailTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
+            emailTextField.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -50),
             
             phoneNumberLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 100),
-            phoneNumberLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            phoneNumberLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -200),
+            phoneNumberLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
+            phoneNumberLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -200),
             
             phoneNumTextField.topAnchor.constraint(equalTo: phoneNumberLabel.bottomAnchor, constant: 15),
-            phoneNumTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            phoneNumTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -50),
+            phoneNumTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
+            phoneNumTextField.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -50),
             
             nextButton.topAnchor.constraint(equalTo: phoneNumTextField.bottomAnchor, constant: 60),
-            nextButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 260),
-            nextButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
-            nextButton.heightAnchor.constraint(equalToConstant: 40)
+            nextButton.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 280),
+            nextButton.widthAnchor.constraint(equalToConstant: 100),
+            nextButton.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -10)
         ])
         
     }
@@ -144,8 +172,8 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate {
         }
         
         if isValidEmail(email) {
-            let clientData = ClientDataDBModel(clientName: name, clientEmail: email, clientNum: phone)
-            clientDBOperations.saveData(client: clientData)
+            clientData = ClientDataDBModel(clientName: name, clientEmail: email, clientNum: phone)
+            clientDBOperations.saveData(client: clientData!)
         }
         
         print("here")
@@ -157,6 +185,9 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate {
         }
         if isValidEmail(email) {
             let vc = InvoiceDetailViewController()
+//            vc.delegate = self
+            clientData = ClientDataDBModel(clientName: name, clientEmail: email, clientNum: phone)
+            vc.client = clientData!
             let rootVC = UINavigationController(rootViewController: vc)
             rootVC.modalTransitionStyle = .crossDissolve
             rootVC.modalPresentationStyle = .pageSheet
@@ -170,6 +201,28 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
+    }
+    
+    @objc func adjustForKeyboard(notification: Notification) {
+        guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+
+        let keyboardScreenEndFrame = keyboardValue.cgRectValue
+        let keyboardViewEndFrame = view.convert(keyboardScreenEndFrame, from: view.window)
+
+        if notification.name == UIResponder.keyboardWillHideNotification {
+            scrollView.contentInset = .zero
+        } else {
+            scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height - view.safeAreaInsets.bottom, right: 0)
+        }
+
+        scrollView.scrollIndicatorInsets = scrollView.contentInset
+    }
+    
+    // disable scrolling horizontally
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.x != 0 {
+            scrollView.contentOffset.x = 0
+        }
     }
     
 

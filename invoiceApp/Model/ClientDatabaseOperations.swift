@@ -28,7 +28,6 @@ class ClientDatabaseOperations {
     func saveData(client: ClientDataDBModel) {
         if let context {
             context.insert(client)
-            print("IM HERE NOW")
         }
     }
     

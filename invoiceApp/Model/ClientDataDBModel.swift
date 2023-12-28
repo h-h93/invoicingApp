@@ -13,6 +13,7 @@ class ClientDataDBModel {
     var clientName: String
     @Attribute(.unique) var clientEmail: String
     var clientNum: String
+    var invoices = [InvoiceDBModel]()
     
     init(clientName: String, clientEmail: String, clientNum: String) {
         self.clientName = clientName
