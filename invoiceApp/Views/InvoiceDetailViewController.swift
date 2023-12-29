@@ -9,6 +9,13 @@ import UIKit
 
 class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     
+    enum TextFieldData: Int {
+        
+        case nameTextField = 0
+        case emailTextField
+        case phoneTextField
+    }
+    
 //    weak var delegate: CreateInvoiceViewController!
     var client: ClientDataDBModel?
     let titleLabel: UILabel = {
@@ -69,6 +76,7 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .white
+        tableView.separatorStyle = .none
         return tableView
     }()
     
@@ -131,16 +139,30 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as! CreateInvoiceTableViewCell
-        cell.selectionStyle = .none
-        cell.costText.tag = indexPath.row
-        cell.taskText.tag = indexPath.row
-        cell.costText.delegate = self
-        cell.taskText.delegate = self
+        //cell.selectionStyle = .none
+//        var taskTextField = UITextField()
+//        taskTextField.tag = indexPath.row
+//        taskTextField.translatesAutoresizingMaskIntoConstraints = false
+//        taskTextField.placeholder = "Task name"
+//        taskTextField.isHidden = false
+//        taskTextField.textColor = .black
+//        taskTextField.delegate = self
+//        cell.contentView.addSubview(taskTextField)
+//        NSLayoutConstraint.activate([
+//            taskTextField.topAnchor.constraint(equalTo: cell.topAnchor, constant: 8),
+//            taskTextField.leadingAnchor.constraint(equalTo: cell.leadingAnchor),
+//            taskTextField.heightAnchor.constraint(equalToConstant: 50),
+//            taskTextField.widthAnchor.constraint(equalToConstant: 150),
+//            taskTextField.bottomAnchor.constraint(equalTo: cell.bottomAnchor, constant: -10),
+//        ])
+//        
+//        cell.backgroundColor = .white
+        
         return cell
     }
     
@@ -156,6 +178,10 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 100
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        
     }
 
     @objc func createInvoice() {

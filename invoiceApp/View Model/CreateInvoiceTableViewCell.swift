@@ -32,13 +32,13 @@ class CreateInvoiceTableViewCell: UITableViewCell {
     var view: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .clear
+        view.backgroundColor = .white
         return view
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        addSubview(view)
+        self.contentView.addSubview(view)
         view.addSubview(taskText)
         view.addSubview(costText)
         setupConstraints()
@@ -61,13 +61,15 @@ class CreateInvoiceTableViewCell: UITableViewCell {
             view.trailingAnchor.constraint(equalTo: trailingAnchor),
             view.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            taskText.topAnchor.constraint(equalTo: view.topAnchor),
+            taskText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             taskText.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            taskText.heightAnchor.constraint(equalToConstant: 50),
             taskText.widthAnchor.constraint(equalToConstant: 150),
             taskText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
             
-            costText.topAnchor.constraint(equalTo: view.topAnchor),
+            costText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             costText.leadingAnchor.constraint(equalTo: taskText.trailingAnchor, constant: 100),
+            taskText.heightAnchor.constraint(equalToConstant: 50),
             costText.widthAnchor.constraint(equalToConstant: 150),
             costText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
         ])
