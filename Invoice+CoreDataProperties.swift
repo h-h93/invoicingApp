@@ -2,7 +2,7 @@
 //  Invoice+CoreDataProperties.swift
 //  invoiceApp
 //
-//  Created by hanif hussain on 01/01/2024.
+//  Created by hanif hussain on 02/01/2024.
 //
 //
 
@@ -16,10 +16,10 @@ extension Invoice {
         return NSFetchRequest<Invoice>(entityName: "Invoice")
     }
 
-    @NSManaged public var date: Date?
     @NSManaged public var amount: NSDecimalNumber?
-    @NSManaged public var task: NSSet?
+    @NSManaged public var date: Date?
     @NSManaged public var client: Client?
+    @NSManaged public var task: NSSet?
 
 }
 
