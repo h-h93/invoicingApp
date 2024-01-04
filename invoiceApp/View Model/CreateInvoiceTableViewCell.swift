@@ -8,6 +8,15 @@
 import UIKit
 
 class CreateInvoiceTableViewCell: UITableViewCell {
+    let attributes: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 16),
+        .backgroundColor: UIColor.clear,
+        .underlineStyle: NSUnderlineStyle.double,
+    ]
+    
+    var taskPlaceHolderText = "Enter task"
+    var costPlaceHolderText = "Enter amount"
+    
     var taskText: UITextField = {
         let task = UITextField()
         task.borderStyle = .none
@@ -15,6 +24,7 @@ class CreateInvoiceTableViewCell: UITableViewCell {
         task.placeholder = "Enter task name"
         task.textColor = .black
         task.backgroundColor = .clear
+        task.adjustsFontSizeToFitWidth = true
         task.setUnderLine()
         return task
     }()
@@ -22,9 +32,10 @@ class CreateInvoiceTableViewCell: UITableViewCell {
         let cost = UITextField()
         cost.borderStyle = .none
         cost.translatesAutoresizingMaskIntoConstraints = false
-        cost.placeholder = "Enter cost"
+        cost.placeholder = "Enter amount"
         cost.textColor = .black
         cost.backgroundColor = .clear
+        cost.adjustsFontSizeToFitWidth = true
         cost.setUnderLine()
         return cost
     }()
@@ -38,6 +49,11 @@ class CreateInvoiceTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+
+        let attributedTaskText = NSAttributedString(string: taskPlaceHolderText, attributes: attributes)
+        let attributedCostText = NSAttributedString(string: costPlaceHolderText, attributes: attributes)
+        taskText.attributedPlaceholder = attributedTaskText
+        costText.attributedPlaceholder = attributedCostText
         self.contentView.addSubview(view)
         view.addSubview(taskText)
         view.addSubview(costText)
@@ -63,13 +79,13 @@ class CreateInvoiceTableViewCell: UITableViewCell {
             
             taskText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             taskText.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            taskText.heightAnchor.constraint(equalToConstant: 50),
+           // taskText.heightAnchor.constraint(equalToConstant: 50),
             taskText.widthAnchor.constraint(equalToConstant: 150),
             taskText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
             
             costText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             costText.leadingAnchor.constraint(equalTo: taskText.trailingAnchor, constant: 100),
-            taskText.heightAnchor.constraint(equalToConstant: 50),
+           // taskText.heightAnchor.constraint(equalToConstant: 50),
             costText.widthAnchor.constraint(equalToConstant: 150),
             costText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
         ])

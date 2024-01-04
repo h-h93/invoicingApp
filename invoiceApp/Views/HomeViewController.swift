@@ -9,23 +9,29 @@ import UIKit
 
 class HomeViewController: UIViewController, UIScrollViewDelegate {
     
-    var invoiceView: InvoiceView = {
-        let invoiceView = InvoiceView()
-        invoiceView.translatesAutoresizingMaskIntoConstraints = false
-        return invoiceView
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    var upcomingPayments: InvoiceView = {
+        let view = InvoiceView()
+        view.titleLabel.text = "Upcoming payments"
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.dropShadow()
+        return view
+    }()
+    
+    var latestInvoiceView: InvoiceView = {
+        let view = InvoiceView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.dropShadow()
+        return view
     }()
     var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
-    var upcomingPayments: InvoiceView = {
-        let view = InvoiceView()
-        view.titleLabel.text = "Upcoming payments"
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
+
+    var clients = [Client]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +43,7 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addInvoice))
         
         view.addSubview(scrollView)
-        scrollView.addSubview(invoiceView)
+        scrollView.addSubview(latestInvoiceView)
         scrollView.addSubview(upcomingPayments)
         
         NSLayoutConstraint.activate([
@@ -46,20 +52,52 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
             scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
             
-            upcomingPayments.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 150),
-            upcomingPayments.heightAnchor.constraint(equalToConstant: 200),
+            upcomingPayments.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 100),
+            upcomingPayments.heightAnchor.constraint(equalToConstant: 300),
             upcomingPayments.widthAnchor.constraint(equalToConstant: view.frame.width - 50),
             upcomingPayments.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 25),
             upcomingPayments.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -5),
             
-            invoiceView.topAnchor.constraint(equalTo: upcomingPayments.bottomAnchor, constant: 150),
-            invoiceView.heightAnchor.constraint(equalToConstant: 200),
-            invoiceView.widthAnchor.constraint(equalToConstant: view.frame.width - 50),
-            invoiceView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 25),
-            invoiceView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -5),
-            invoiceView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -100)
+            latestInvoiceView.topAnchor.constraint(equalTo: upcomingPayments.bottomAnchor, constant: 55),
+            latestInvoiceView.heightAnchor.constraint(equalToConstant: 300),
+            latestInvoiceView.widthAnchor.constraint(equalToConstant: view.frame.width - 50),
+            latestInvoiceView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 25),
+            latestInvoiceView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -5),
+            latestInvoiceView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -100)
 
         ])
+        
+        loadInvoices()
+    }
+    
+    func loadInvoices() {
+        latestInvoiceView.tableHeaderTextOne = "Client"
+        latestInvoiceView.tableHeaderTextTwo = "Amount"
+        upcomingPayments.tableHeaderTextOne = "Client"
+        upcomingPayments.tableHeaderTextTwo = "Amount"
+        do {
+            clients = try context.fetch(Client.createFetchRequest())
+            let sort = NSSortDescriptor(key: #keyPath(Invoice.date), ascending: true)
+            
+            latestInvoiceView.clients = self.clients
+            upcomingPayments.clients = self.clients
+        } catch {
+            
+        }
+        
+        if clients.isEmpty {
+            upcomingPayments.emptyClientsText = "No upcoming payments found"
+            
+        }
+        
+        latestInvoiceView.tableView.reloadData()
+        upcomingPayments.tableView.reloadData()
+        
+//        print(clients.count)
+//        let d = clients[0].invoice.allObjects as! [Invoice]
+//        let p = d[0].task.allObjects as! [Task]
+//        print(p[0].amount)
+//        print(clients[0].name)
     }
     
     // disable scrolling horizontally

@@ -12,14 +12,14 @@ import CoreData
 
 extension Client {
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Client> {
+    @nonobjc public class func createFetchRequest() -> NSFetchRequest<Client> {
         return NSFetchRequest<Client>(entityName: "Client")
     }
 
-    @NSManaged public var name: String?
-    @NSManaged public var email: String?
-    @NSManaged public var number: String?
-    @NSManaged public var invoice: NSSet?
+    @NSManaged public var name: String
+    @NSManaged public var email: String
+    @NSManaged public var number: String
+    @NSManaged public var invoice: NSSet
 
 }
 

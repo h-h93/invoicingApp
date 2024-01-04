@@ -9,15 +9,14 @@ import UIKit
 
 class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     
-    enum TextFieldData: Int {
-        
-        case nameTextField = 0
-        case emailTextField
-        case phoneTextField
-    }
+    var context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
 //    weak var delegate: CreateInvoiceViewController!
-    var client: ClientDataDBModel?
+    var client: Client!
+    
+    var tasks = [Task]()
+    var invoice: Invoice!
+    
     let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -27,36 +26,22 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
         return label
     }()
     
-    let taskLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Task"
-        label.font = .systemFont(ofSize: 16, weight: .light, width: .compressed)
-        label.textColor = .lightGray
-        return label
+    let datePicker: UIDatePicker = {
+        let datePicker = UIDatePicker()
+        datePicker.datePickerMode = .date
+        datePicker.minimumDate = .now
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        return datePicker
     }()
-    
-    let costLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Cost"
-        label.font = .systemFont(ofSize: 16, weight: .light, width: .compressed)
-        label.textColor = .lightGray
-        return label
-    }()
-    
-    let attributes: [NSAttributedString.Key: Any] = [
-        .font: UIFont.systemFont(ofSize: 16),
-        .backgroundColor: UIColor.black,
-        .underlineStyle: NSUnderlineStyle.single
-    ]
     
     var addTaskButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 16),
-            .backgroundColor: UIColor.blue,
+            .backgroundColor: UIColor.white,
+            .foregroundColor: UIColor.blue
             //.underlineStyle: NSUnderlineStyle.single
         ]
         let attributedString = NSAttributedString(string: "Add task", attributes: attributes)
@@ -69,6 +54,7 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
         view.layer.cornerRadius = 5
+        view.dropShadow()
         return view
     }()
     
@@ -80,8 +66,28 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
         return tableView
     }()
     
+    let paymentDateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Due date: "
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "Helvetica", size: 12)
+        return label
+    }()
+    
+    // keep track of our tableview textfields to verif if they've been filled in
+    var taskText = [UITextField]()
+    var costText = [UITextField]()
+    var selectedRow = 0
+    var taskDictionary = [String: Double]()
+    
     let reuseIdentifier = "Cell"
     
+    let id = UUID().uuidString
+    
+    var taskCount = 1
+    
+    var paymentDate = Date()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -91,11 +97,14 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
         tableView.dataSource = self
         tableView.register(CreateInvoiceTableViewCell.self, forCellReuseIdentifier: reuseIdentifier)
         
+        addTaskButton.addTarget(self, action: #selector(addRow), for: .touchUpInside)
+        
         view.addSubview(titleLabel)
         view.addSubview(tableContainerView)
+        view.addSubview(addTaskButton)
         tableContainerView.addSubview(tableView)
-        
-        createTaskEntryFields()
+        view.addSubview(paymentDateLabel)
+        view.addSubview(datePicker)
 
         setupViewConstraints()
         
@@ -115,63 +124,73 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
             tableView.topAnchor.constraint(equalTo: tableContainerView.topAnchor, constant: 2),
             tableView.leadingAnchor.constraint(equalTo: tableContainerView.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: tableContainerView.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: tableContainerView.bottomAnchor, constant: -2)
+            tableView.bottomAnchor.constraint(equalTo: tableContainerView.bottomAnchor, constant: -2),
+            
+            addTaskButton.topAnchor.constraint(equalTo: tableContainerView.bottomAnchor, constant: 10),
+            addTaskButton.heightAnchor.constraint(equalToConstant: 100),
+            addTaskButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 240),
+            addTaskButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
+            
+            paymentDateLabel.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 10),
+            paymentDateLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            paymentDateLabel.widthAnchor.constraint(equalToConstant: 60),
+            paymentDateLabel.heightAnchor.constraint(equalToConstant: 50),
+            
+            datePicker.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 10),
+            datePicker.leadingAnchor.constraint(equalTo: paymentDateLabel.trailingAnchor, constant: 10),
+            datePicker.widthAnchor.constraint(equalToConstant: 100),
+            datePicker.heightAnchor.constraint(equalToConstant: 50),
             
         ])
     }
     
-    func createTaskEntryFields() {
-        var task = UITextField()
-        task.borderStyle = .none
-        task.translatesAutoresizingMaskIntoConstraints = false
-        task.placeholder = "Enter task name"
-        task.textColor = .black
-        task.setUnderLine()
-
-        
-        var cost = UITextField()
-        cost.borderStyle = .none
-        cost.translatesAutoresizingMaskIntoConstraints = false
-        cost.placeholder = "Enter task name"
-        cost.textColor = .black
-        cost.setUnderLine()
-        
-    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return taskCount
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as! CreateInvoiceTableViewCell
-        //cell.selectionStyle = .none
-//        var taskTextField = UITextField()
-//        taskTextField.tag = indexPath.row
-//        taskTextField.translatesAutoresizingMaskIntoConstraints = false
-//        taskTextField.placeholder = "Task name"
-//        taskTextField.isHidden = false
-//        taskTextField.textColor = .black
-//        taskTextField.delegate = self
-//        cell.contentView.addSubview(taskTextField)
-//        NSLayoutConstraint.activate([
-//            taskTextField.topAnchor.constraint(equalTo: cell.topAnchor, constant: 8),
-//            taskTextField.leadingAnchor.constraint(equalTo: cell.leadingAnchor),
-//            taskTextField.heightAnchor.constraint(equalToConstant: 50),
-//            taskTextField.widthAnchor.constraint(equalToConstant: 150),
-//            taskTextField.bottomAnchor.constraint(equalTo: cell.bottomAnchor, constant: -10),
-//        ])
-//        
-//        cell.backgroundColor = .white
+        cell.selectionStyle = .none
+        cell.costText.delegate = self
+        cell.taskText.delegate = self
+        cell.taskText.tag = indexPath.row
+        cell.costText.tag = indexPath.row
+        cell.costText.keyboardType = .decimalPad
+        
+        taskText.append(cell.taskText)
+        costText.append(cell.costText)
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        print(indexPath.row)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 50
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView()
+        var clientNameLabel: UILabel = {
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+            //label.translatesAutoresizingMaskIntoConstraints = false
+            label.text = "Task"
+            label.textColor = .lightGray
+            return label
+        }()
+        var amountLabel: UILabel = {
+            let label = UILabel(frame: CGRect(x: 250, y: 0, width: 50, height: 50))
+            //label.translatesAutoresizingMaskIntoConstraints = false
+            label.text = "Rate"
+            label.textColor = .lightGray
+            return label
+        }()
+        
+        view.addSubview(clientNameLabel)
+        view.addSubview(amountLabel)
+        view.backgroundColor = .white
         
         return view
     }
@@ -180,11 +199,44 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UITabl
         return 100
     }
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        selectedRow = textField.tag
+        if taskText[selectedRow].text != nil || costText[selectedRow].text != nil {
+        }
+    }
+    
+    @objc func addRow() {
+        taskCount += 1
+        tableView.reloadData()
     }
 
     @objc func createInvoice() {
+        let invoice = Invoice(context: context)
+        invoice.client = client
+        invoice.date = datePicker.date
+        var total = 0.0 as Decimal
+        
+        for (index, _ ) in taskText.enumerated() {
+            if !taskText[index].text!.isEmpty || !costText[index].text!.isEmpty {
+                let cost = Decimal(string: costText[index].text!)
+                let task = Task(context: context)
+                task.amount = cost! as NSDecimalNumber
+                total += cost!
+                task.task = taskText[index].text!
+                task.invoice = invoice
+            }
+        }
+        
+        invoice.amount = total as NSDecimalNumber
+
+        if context.hasChanges {
+            do {
+                try context.save()
+                print("here")
+            } catch {
+                
+            }
+        }
         
     }
 }
@@ -202,3 +254,20 @@ extension UITextField {
     }
 
 }
+
+extension UITableView {
+    /// Reloads a table view without losing track of what was selected.
+    func reloadDataSavingSelections() {
+        let selectedRows = indexPathsForSelectedRows
+
+        reloadData()
+
+        if let selectedRow = selectedRows {
+            for indexPath in selectedRow {
+                selectRow(at: indexPath, animated: false, scrollPosition: .none)
+            }
+        }
+    }
+}
+
+// test@test.com

@@ -10,6 +10,10 @@ import SwiftData
 
 class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScrollViewDelegate {
     
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    var clients = [Client]()
+    
     var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -91,13 +95,10 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
     }()
     
     
-
-    let clientDBOperations = ClientDatabaseOperations()
-    var clientData: ClientDataDBModel?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(addClient))
         
@@ -113,8 +114,9 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
         scrollView.delegate = self
         scrollView.contentSize = CGSize(width: view.frame.size.width, height: 300)
         
-        view.addSubview(scrollView)
         view.addSubview(titleLabel)
+        view.addSubview(scrollView)
+        
         
         scrollView.addSubview(fullNameLabel)
         scrollView.addSubview(emailLabel)
@@ -124,8 +126,13 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
         scrollView.addSubview(phoneNumTextField)
         scrollView.addSubview(nextButton)
         
+        setupConstraints()
+
+    }
+    
+    func setupConstraints() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
             titleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
             titleLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -200),
             
@@ -163,7 +170,6 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
             nextButton.widthAnchor.constraint(equalToConstant: 100),
             nextButton.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -10)
         ])
-        
     }
     
     @objc func addClient() {
@@ -172,8 +178,7 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
         }
         
         if isValidEmail(email) {
-            clientData = ClientDataDBModel(clientName: name, clientEmail: email, clientNum: phone)
-            clientDBOperations.saveData(client: clientData!)
+            
         }
         
         print("here")
@@ -185,14 +190,48 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
         }
         if isValidEmail(email) {
             let vc = InvoiceDetailViewController()
+            
 //            vc.delegate = self
-            clientData = ClientDataDBModel(clientName: name, clientEmail: email, clientNum: phone)
-            vc.client = clientData!
+            let client = Client(context: context)
+            client.email = email
+            client.name = name
+            client.number = phone
+            
+//            let invoice = Invoice(context: context)
+//            invoice.amount = 0.0
+//            let formatter = ISO8601DateFormatter()
+//            invoice.date = Date()
+//            invoice.client = client
+//            
+//            let task = Task(context: context)
+//            task.amount = 10.0
+//            task.task = "help me"
+//            task.invoice = invoice
+//            
+//            do {
+//                try context.save()
+//            } catch {
+//                
+//            }
+//            
+//            let task2 = Task(context: context)
+//            task2.amount = 100.0
+//            task2.task = "help You"
+//            task2.invoice = invoice
+//        
+//            do {
+//                try context.save()
+//            } catch {
+//                
+//            }
+
+            vc.client = client
             let rootVC = UINavigationController(rootViewController: vc)
             rootVC.modalTransitionStyle = .crossDissolve
             rootVC.modalPresentationStyle = .pageSheet
             rootVC.sheetPresentationController?.prefersGrabberVisible = true
             present(rootVC, animated: true)
+            
         }
     }
     
@@ -224,16 +263,5 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
             scrollView.contentOffset.x = 0
         }
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

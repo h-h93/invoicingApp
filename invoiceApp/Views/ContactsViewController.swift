@@ -16,25 +16,10 @@ class ContactsViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.backgroundColor = .clear
         return tableView
     }()
-    var clientData = ClientDatabaseOperations()
-    var clients = [ClientDataDBModel]()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
-        clientData.fetchClients { data, error in
-            if let error {
-                print(error)
-            }
-            if let data {
-                self.clients = data
-                print(self.clients)
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            }
-        }
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -62,14 +47,12 @@ class ContactsViewController: UIViewController, UITableViewDelegate, UITableView
         // set cell selection colour
         cell.selectionStyle = .default
         cell.textLabel?.textColor = .black
-        if !clients.isEmpty {
-            cell.textLabel?.text = clients[indexPath.row].clientName
-        }
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return clients.count
+        return 1
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
