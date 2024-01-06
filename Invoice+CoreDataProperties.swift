@@ -2,7 +2,7 @@
 //  Invoice+CoreDataProperties.swift
 //  invoiceApp
 //
-//  Created by hanif hussain on 02/01/2024.
+//  Created by hanif hussain on 05/01/2024.
 //
 //
 
@@ -12,14 +12,14 @@ import CoreData
 
 extension Invoice {
 
-    @nonobjc public class func createFetchRequest() -> NSFetchRequest<Invoice> {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Invoice> {
         return NSFetchRequest<Invoice>(entityName: "Invoice")
     }
 
-    @NSManaged public var amount: NSDecimalNumber
-    @NSManaged public var date: Date
-    @NSManaged public var client: Client
-    @NSManaged public var task: NSSet
+    @NSManaged public var amount: NSDecimalNumber?
+    @NSManaged public var date: Date?
+    @NSManaged public var client: Client?
+    @NSManaged public var task: NSSet?
 
 }
 

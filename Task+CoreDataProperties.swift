@@ -2,7 +2,7 @@
 //  Task+CoreDataProperties.swift
 //  invoiceApp
 //
-//  Created by hanif hussain on 02/01/2024.
+//  Created by hanif hussain on 05/01/2024.
 //
 //
 
@@ -12,13 +12,13 @@ import CoreData
 
 extension Task {
 
-    @nonobjc public class func createFetchRequest() -> NSFetchRequest<Task> {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Task> {
         return NSFetchRequest<Task>(entityName: "Task")
     }
 
-    @NSManaged public var amount: NSDecimalNumber
-    @NSManaged public var task: String
-    @NSManaged public var invoice: Invoice
+    @NSManaged public var amount: NSDecimalNumber?
+    @NSManaged public var task: String?
+    @NSManaged public var invoice: Invoice?
 
 }
 
