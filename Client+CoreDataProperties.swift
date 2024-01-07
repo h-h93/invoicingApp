@@ -2,7 +2,7 @@
 //  Client+CoreDataProperties.swift
 //  invoiceApp
 //
-//  Created by hanif hussain on 05/01/2024.
+//  Created by hanif hussain on 07/01/2024.
 //
 //
 
@@ -16,8 +16,8 @@ extension Client {
         return NSFetchRequest<Client>(entityName: "Client")
     }
 
-    @NSManaged public var name: String?
     @NSManaged public var email: String?
+    @NSManaged public var name: String?
     @NSManaged public var number: String?
     @NSManaged public var invoice: NSSet?
 
