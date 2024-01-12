@@ -8,7 +8,7 @@
 import UIKit
 import SwiftData
 
-class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScrollViewDelegate {
+class CreateClientViewController: UIViewController, UITextFieldDelegate, UIScrollViewDelegate {
     
     var scrollView: CreateContactView = {
         let scrollView = CreateContactView()
@@ -36,6 +36,10 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
         NotificationCenter.default.addObserver(self, selector: #selector(dismissView), name: NSNotification.Name("com.invoiceCreated"), object: nil)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(addClient))
+        
+        if updateContact {
+            navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Delete", style: .plain, target: self, action: #selector(deleteClient))
+        }
         
         scrollView.nextButton.addTarget(self, action: #selector(createInvoice), for: .touchUpInside)
         
@@ -81,7 +85,22 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
                 databaseOp.createNewClient(name: name, email: email, number: phone)
             }
         }
+        NotificationCenter.default.post(name: NSNotification.Name("com.updateClient"), object: nil)
         self.dismissView()
+    }
+    
+    @objc func deleteClient() {
+        let databaseOperations = DatabaseOperations()
+        let ac = UIAlertController(title: "Are you sure you want to delete: ", message: previousEmail, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Delete", style: .default, handler: { UIAlertAction in
+            databaseOperations.deleteClient(email: self.previousEmail)
+            NotificationCenter.default.post(name: NSNotification.Name("com.updateClient"), object: nil)
+            self.dismiss(animated: true)
+        }))
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        present(ac, animated: true)
+        
     }
     
     @objc func createInvoice() {

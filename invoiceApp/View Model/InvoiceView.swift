@@ -28,7 +28,7 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
     var tableHeaderTextOne = "Task"
     var tableHeaderTextTwo = "Cost"
     
-    var emptyClientsText = "Get started and add clients"
+    var emptyClientsText = "No Clients yet"
     
     ///var clients = [Client]()
     var invoices = [Invoice]()
@@ -81,14 +81,8 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-    func parseClientsInvoices() {
-        if !invoices.isEmpty {
-            
-        }
-    }
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
+        // cell with detail text label (subtitle)
 //        var cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier")
 //        if cell == nil {
 //            cell = UITableViewCell(style: .value1, reuseIdentifier: "reuseIdentifier")
@@ -105,9 +99,10 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
             cell.isUserInteractionEnabled = true
         } else {
             if indexPath.row == 0 {
-                cell.textLabel?.text = emptyClientsText
+                print("here i am")
                 cell.costText.placeholder = ""
-                cell.taskText.placeholder = ""
+                cell.taskText.placeholder = emptyClientsText
+                cell.taskText.adjustsFontSizeToFitWidth = true
                 cell.taskText.isUserInteractionEnabled = false
                 cell.costText.isUserInteractionEnabled = false
                 cell.isUserInteractionEnabled = false

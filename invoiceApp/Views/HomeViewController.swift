@@ -7,7 +7,7 @@
 
 import UIKit
 
-class HomeViewController: UIViewController, UIScrollViewDelegate {
+class HomeViewController: UIViewController, UIScrollViewDelegate, UITableViewDelegate {
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
@@ -24,7 +24,7 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
     var latestInvoiceView: InvoiceView = {
         let view = InvoiceView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.emptyClientsText = "Get started and create invoices"
+        view.emptyClientsText = "Nothing here yet"
         view.tableHeaderTextOne = "Client"
         view.tableHeaderTextTwo = "Amount"
         view.dropShadow()
@@ -46,9 +46,8 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
-        self.loadInvoices()
-        
+
+        loadInvoices()
         //define the scrollable area by default it is zero
         scrollView.contentSize = CGSize(width: view.frame.size.width, height: 800)
         scrollView.delegate = self
@@ -56,7 +55,7 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addInvoice))
         
         NotificationCenter.default.addObserver(self, selector: #selector(loadInvoices), name: NSNotification.Name("com.invoiceCreated"), object: nil)
-        
+
         view.addSubview(scrollView)
         scrollView.addSubview(latestInvoiceView)
         scrollView.addSubview(upcomingPaymentsView)
@@ -84,8 +83,8 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        self.latestInvoiceView.tableView.reloadData()
-        self.upcomingPaymentsView.tableView.reloadData()
+        latestInvoiceView.tableView.reloadData()
+        upcomingPaymentsView.tableView.reloadData()
     }
     
     @objc func loadInvoices() {
@@ -105,23 +104,26 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
         
         do {
             //clients = try context.fetch(Client.createFetchRequest())
-            try self.latestInvoicesList = self.context.fetch(latestInvoiceRequest)
-            try self.upcomingPaymentsList = self.context.fetch(upcomingPaymentsRequest)
+            self.latestInvoicesList = try self.context.fetch(latestInvoiceRequest)
+            self.upcomingPaymentsList = try self.context.fetch(upcomingPaymentsRequest)
             
             // pass the filtered invoices to the invoiceview class to display invoices
             self.latestInvoiceView.invoices = self.latestInvoicesList
             self.upcomingPaymentsView.invoices = self.upcomingPaymentsList
-            self.latestInvoiceView.tableView.reloadData()
-            self.upcomingPaymentsView.tableView.reloadData()
         } catch {
-                
+            print(error.localizedDescription)
         }
+        
+        upcomingPaymentsView.tableView.reloadData()
+        latestInvoiceView.tableView.reloadData()
         ////        print(clients.count)
         //        let d = clients[0].invoice.allObjects as! [Invoice]
         //        let p = d[0].task.allObjects as! [Task]
         //        print(d.count)
         //        print(p[0].amount)
         //        print(clients[0].name)
+        
+        
     }
     
     // disable scrolling horizontally
@@ -132,7 +134,7 @@ class HomeViewController: UIViewController, UIScrollViewDelegate {
     }
     
     @objc func addInvoice() {
-        let vc = CreateInvoiceViewController()
+        let vc = CreateClientViewController()
         let rootVC = UINavigationController(rootViewController: vc)
         rootVC.modalPresentationStyle = .pageSheet
         rootVC.modalTransitionStyle = .coverVertical

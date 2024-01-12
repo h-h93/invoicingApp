@@ -25,7 +25,7 @@ class ContactsViewController: UIViewController, UITableViewDelegate, UITableView
         super.viewDidLoad()
         view.backgroundColor = .white
         
-        clients = databaseOperations.fetchClients()
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadData), name: NSNotification.Name("com.updateClient"), object: nil)
 
         tableView.delegate = self
         tableView.dataSource = self
@@ -41,6 +41,11 @@ class ContactsViewController: UIViewController, UITableViewDelegate, UITableView
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
         ])
         // Do any additional setup after loading the view.
+    }
+    
+    @objc func reloadData() {
+        clients = databaseOperations.fetchClients()
+        tableView.reloadData()
     }
     
 
@@ -78,7 +83,7 @@ class ContactsViewController: UIViewController, UITableViewDelegate, UITableView
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc = CreateInvoiceViewController()
+        let vc = CreateClientViewController()
         vc.previousEmail = clients[indexPath.row].email
         vc.updateContact = true
         vc.scrollView.emailTextField.text = clients[indexPath.row].email

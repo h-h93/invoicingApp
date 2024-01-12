@@ -34,6 +34,21 @@ class DatabaseOperations {
         
     }
     
+    func deleteClient(email: String) {
+        let request = Client.createFetchRequest()
+        request.predicate = NSPredicate(format: "email ==%@", argumentArray: [email])
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        do {
+            let results = try context.fetch(request)
+            if results.count != 0 {
+                context.delete(results[0])
+            }
+            try context.save()
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
     func updateClient(currentEmail: String, name: String, email: String, number: String) {
         let request = Client.createFetchRequest()
         request.predicate = NSPredicate(format: "email ==%@", argumentArray: [currentEmail])
