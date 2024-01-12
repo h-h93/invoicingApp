@@ -9,21 +9,28 @@ import UIKit
 
 class ContactsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    let cellIdentifier = "Cell"
+    let reuseIdentifier = "Cell"
     var tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .clear
+        tableView.separatorStyle = .none
+        tableView.dropShadow()
         return tableView
     }()
+    let databaseOperations = DatabaseOperations()
+    var clients = [Client]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         
+        clients = databaseOperations.fetchClients()
+
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+        
+        //tableView.register(UITableViewCell.self, forCellReuseIdentifier: reuseIdentifier)
         
         view.addSubview(tableView)
         
@@ -31,32 +38,62 @@ class ContactsViewController: UIViewController, UITableViewDelegate, UITableView
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
         ])
         // Do any additional setup after loading the view.
     }
     
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
+        var cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier)
+        if cell == nil {
+            cell = UITableViewCell(style: .value1, reuseIdentifier: reuseIdentifier)
+        }
         let backgroundView = UIView()
         backgroundView.backgroundColor = UIColor.red
-        cell.selectedBackgroundView = backgroundView
+        cell!.selectedBackgroundView = backgroundView
         // set cell background colour
-        cell.backgroundColor = .white
+        cell!.backgroundColor = .white
         // set cell selection colour
-        cell.selectionStyle = .default
-        cell.textLabel?.textColor = .black
-        
-        return cell
+        cell!.selectionStyle = .default
+        cell!.textLabel?.textColor = .black
+        if !clients.isEmpty {
+            cell!.textLabel?.text = "Name: \n \n\(clients[indexPath.row].name)"
+            cell?.textLabel?.numberOfLines = 0
+            cell!.detailTextLabel?.text = "Email: \n \n\(clients[indexPath.row].email.lowercased())"
+            cell?.detailTextLabel?.textAlignment = .left
+            cell?.detailTextLabel?.numberOfLines = 0
+            cell?.accessoryType = .disclosureIndicator
+        }
+        cell?.selectionStyle = .none
+        return cell!
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        if !clients.isEmpty {
+            return clients.count
+        } else {
+            return 0
+        }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        let vc = CreateInvoiceViewController()
+        vc.previousEmail = clients[indexPath.row].email
+        vc.updateContact = true
+        vc.scrollView.emailTextField.text = clients[indexPath.row].email
+        vc.scrollView.nameTextField.text = clients[indexPath.row].name
+        vc.scrollView.phoneNumTextField.text = clients[indexPath.row].number
+        // navigationController?.pushViewController(vc, animated: true)
+        let rootVC = UINavigationController(rootViewController: vc)
+        rootVC.modalPresentationStyle = .formSheet
+        rootVC.modalTransitionStyle = .crossDissolve
+        rootVC.sheetPresentationController?.prefersGrabberVisible = true
+        self.present(rootVC, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 100
     }
 
 }

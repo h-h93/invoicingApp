@@ -12,17 +12,17 @@ import CoreData
 
 extension Invoice {
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Invoice> {
+    @nonobjc public class func createFetchRequest() -> NSFetchRequest<Invoice> {
         return NSFetchRequest<Invoice>(entityName: "Invoice")
     }
 
-    @NSManaged public var amount: NSDecimalNumber?
-    @NSManaged public var date: Date?
-    @NSManaged public var id: String?
-    @NSManaged public var timestamp: Date?
-    @NSManaged public var title: String?
-    @NSManaged public var client: Client?
-    @NSManaged public var task: NSSet?
+    @NSManaged public var amount: NSDecimalNumber
+    @NSManaged public var date: Date
+    @NSManaged public var id: String
+    @NSManaged public var timestamp: Date
+    @NSManaged public var title: String
+    @NSManaged public var client: Client
+    @NSManaged public var task: NSSet
 
 }
 

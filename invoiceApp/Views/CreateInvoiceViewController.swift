@@ -10,15 +10,10 @@ import SwiftData
 
 class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScrollViewDelegate {
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
-    var clients = [Client]()
-    
-    var scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
+    var scrollView: CreateContactView = {
+        let scrollView = CreateContactView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.backgroundColor = .clear
-        scrollView.alpha = 0.7
         return scrollView
     }()
     
@@ -31,100 +26,31 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
         return label
     }()
     
-    let fullNameLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Full name"
-        label.font = .systemFont(ofSize: 12, weight: .light)
-        label.textColor = .lightGray
-        return label
-    }()
-    
-    let emailLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Email"
-        label.font = .systemFont(ofSize: 12, weight: .light)
-        label.textColor = .lightGray
-        return label
-    }()
-    
-    let phoneNumberLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Phone number"
-        label.font = .systemFont(ofSize: 12, weight: .light)
-        label.textColor = .lightGray
-        return label
-    }()
-    
-    var nameTextField: UITextField = {
-        let textField = UITextField()
-        textField.borderStyle = .none
-        textField.textColor = .black
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.attributedPlaceholder = NSAttributedString(string: "Enter name", attributes: [NSAttributedString.Key.foregroundColor : UIColor.systemGray])
-        return textField
-    }()
-    
-    var emailTextField: UITextField = {
-        let textField = UITextField()
-        textField.borderStyle = .none
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.textColor = .black
-        textField.attributedPlaceholder = NSAttributedString(string: "Enter email", attributes: [NSAttributedString.Key.foregroundColor : UIColor.systemGray])
-        return textField
-    }()
-    
-    let nextButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = .red
-        button.layer.cornerRadius = 4
-        button.setTitle("Next", for: .normal)
-        return button
-    }()
-    
-    var phoneNumTextField: UITextField = {
-        let textField = UITextField()
-        textField.borderStyle = .none
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.textColor = .black
-        textField.attributedPlaceholder = NSAttributedString(string: "Enter phone number", attributes: [NSAttributedString.Key.foregroundColor : UIColor.systemGray])
-        return textField
-    }()
-    
+    var updateContact = false
+    var previousEmail = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(dismissView), name: NSNotification.Name("com.invoiceCreated"), object: nil)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(addClient))
         
-        nextButton.addTarget(self, action: #selector(createInvoice), for: .touchUpInside)
+        scrollView.nextButton.addTarget(self, action: #selector(createInvoice), for: .touchUpInside)
         
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         
-        nameTextField.delegate = self
-        emailTextField.delegate = self
-        phoneNumTextField.delegate = self
+        scrollView.nameTextField.delegate = self
+        scrollView.emailTextField.delegate = self
+        scrollView.phoneNumTextField.delegate = self
         scrollView.delegate = self
         scrollView.contentSize = CGSize(width: view.frame.size.width, height: 300)
         
         view.addSubview(titleLabel)
         view.addSubview(scrollView)
-        
-        
-        scrollView.addSubview(fullNameLabel)
-        scrollView.addSubview(emailLabel)
-        scrollView.addSubview(phoneNumberLabel)
-        scrollView.addSubview(nameTextField)
-        scrollView.addSubview(emailTextField)
-        scrollView.addSubview(phoneNumTextField)
-        scrollView.addSubview(nextButton)
         
         setupConstraints()
 
@@ -140,92 +66,35 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100),
-            
-            fullNameLabel.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 50),
-            fullNameLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
-            fullNameLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -200),
-            
-            nameTextField.topAnchor.constraint(equalTo: fullNameLabel.bottomAnchor, constant: 15),
-            nameTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
-            nameTextField.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -50),
-            
-            emailLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 100),
-            emailLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
-            emailLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -200),
-            
-            emailTextField.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: 15),
-            emailTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
-            emailTextField.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -50),
-            
-            phoneNumberLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 100),
-            phoneNumberLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
-            phoneNumberLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -200),
-            
-            phoneNumTextField.topAnchor.constraint(equalTo: phoneNumberLabel.bottomAnchor, constant: 15),
-            phoneNumTextField.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 10),
-            phoneNumTextField.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -50),
-            
-            nextButton.topAnchor.constraint(equalTo: phoneNumTextField.bottomAnchor, constant: 60),
-            nextButton.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 280),
-            nextButton.widthAnchor.constraint(equalToConstant: 100),
-            nextButton.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -10)
         ])
     }
     
     @objc func addClient() {
-        guard let name = nameTextField.text, let email = emailTextField.text, let phone = phoneNumTextField.text, !name.isEmpty, !email.isEmpty, !phone.isEmpty else {
+        guard let name = scrollView.nameTextField.text, let email = scrollView.emailTextField.text?.uppercased(), let phone = scrollView.phoneNumTextField.text, !name.isEmpty, !email.isEmpty, !phone.isEmpty else {
             return
         }
-        
+        let databaseOp = DatabaseOperations()
         if isValidEmail(email) {
-            
+            if updateContact {
+                databaseOp.updateClient(currentEmail: previousEmail, name: name, email: email, number: phone)
+            } else {
+                databaseOp.createNewClient(name: name, email: email, number: phone)
+            }
         }
-        
-        print("here")
+        self.dismissView()
     }
     
     @objc func createInvoice() {
-        guard let name = nameTextField.text, let email = emailTextField.text, let phone = phoneNumTextField.text, !name.isEmpty, !email.isEmpty, !phone.isEmpty else {
+        guard let name = scrollView.nameTextField.text, let email = scrollView.emailTextField.text?.uppercased(), let phone = scrollView.phoneNumTextField.text, !name.isEmpty, !email.isEmpty, !phone.isEmpty else {
             return
         }
         if isValidEmail(email) {
             let vc = InvoiceDetailViewController()
-            
-//            vc.delegate = self
-            let client = Client(context: context)
-            client.email = email
-            client.name = name
-            client.number = phone
-            
-//            let invoice = Invoice(context: context)
-//            invoice.amount = 0.0
-//            let formatter = ISO8601DateFormatter()
-//            invoice.date = Date()
-//            invoice.client = client
-//            
-//            let task = Task(context: context)
-//            task.amount = 10.0
-//            task.task = "help me"
-//            task.invoice = invoice
-//            
-//            do {
-//                try context.save()
-//            } catch {
-//                
-//            }
-//            
-//            let task2 = Task(context: context)
-//            task2.amount = 100.0
-//            task2.task = "help You"
-//            task2.invoice = invoice
-//        
-//            do {
-//                try context.save()
-//            } catch {
-//                
-//            }
 
-            vc.client = client
+            vc.email = email
+            vc.name = name
+            vc.number = phone
+
             let rootVC = UINavigationController(rootViewController: vc)
             rootVC.modalTransitionStyle = .crossDissolve
             rootVC.modalPresentationStyle = .pageSheet
@@ -233,6 +102,10 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
             present(rootVC, animated: true)
             
         }
+    }
+    
+    @objc func dismissView() {
+        self.view.window?.rootViewController?.dismiss(animated: true)
     }
     
     // check if email is valid
@@ -262,6 +135,11 @@ class CreateInvoiceViewController: UIViewController, UITextFieldDelegate, UIScro
         if scrollView.contentOffset.x != 0 {
             scrollView.contentOffset.x = 0
         }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 
 }

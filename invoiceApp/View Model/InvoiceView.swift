@@ -30,9 +30,10 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
     
     var emptyClientsText = "Get started and add clients"
     
-    var clients = [Client]()
+    ///var clients = [Client]()
+    var invoices = [Invoice]()
     
-    var emptyClientsRowCount = 5
+    var emptyInvoicesRowCount = 1
     
     override init(frame: CGRect) {
         super.init(frame: .zero)
@@ -73,10 +74,16 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if clients.isEmpty {
-            return emptyClientsRowCount
+        if invoices.isEmpty {
+            return emptyInvoicesRowCount
         } else {
-            return clients.count
+            return invoices.count
+        }
+    }
+    
+    func parseClientsInvoices() {
+        if !invoices.isEmpty {
+            
         }
     }
     
@@ -89,13 +96,13 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as! CreateInvoiceTableViewCell
         cell.selectionStyle = .none
-        if !clients.isEmpty {
+        if !invoices.isEmpty {
             cell.costText.isUserInteractionEnabled = false
             cell.taskText.isUserInteractionEnabled = false
-            cell.taskText.text = clients[indexPath.row].name
-            let invoice = clients[indexPath.row].invoice.allObjects as! [Invoice]
-            cell.costText.text = "\(invoice[0].amount)"
-
+            cell.taskText.text = invoices[indexPath.row].client.name
+            let invoice = invoices[indexPath.row]
+            cell.costText.text = "\(invoice.amount)"
+            cell.isUserInteractionEnabled = true
         } else {
             if indexPath.row == 0 {
                 cell.textLabel?.text = emptyClientsText
@@ -103,14 +110,9 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
                 cell.taskText.placeholder = ""
                 cell.taskText.isUserInteractionEnabled = false
                 cell.costText.isUserInteractionEnabled = false
-            } else {
-                cell.costText.placeholder = ""
-                cell.taskText.placeholder = ""
-                cell.taskText.isUserInteractionEnabled = false
-                cell.costText.isUserInteractionEnabled = false
+                cell.isUserInteractionEnabled = false
             }
         }
-        
         // set cell background colour
         cell.backgroundColor = .clear
         
@@ -123,7 +125,7 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView()
-        var clientNameLabel: UILabel = {
+        let clientNameLabel: UILabel = {
             let label = UILabel(frame: CGRect(x: 0, y: 0, width: 50, height: 30))
             //label.translatesAutoresizingMaskIntoConstraints = false
             label.font = UIFont(name: "Roboto", size: 8)
@@ -132,8 +134,8 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
             label.textColor = .lightGray
             return label
         }()
-        var amountLabel: UILabel = {
-            let label = UILabel(frame: CGRect(x: 250, y: 0, width: 60, height: 30))
+        let amountLabel: UILabel = {
+            let label = UILabel(frame: CGRect(x: 230, y: 0, width: 60, height: 30))
             //label.translatesAutoresizingMaskIntoConstraints = false
             label.font = UIFont(name: "Roboto", size: 8)
             label.text = tableHeaderTextTwo
@@ -157,16 +159,4 @@ class InvoiceView: UIView, UITableViewDelegate, UITableViewDataSource {
         return 100
     }
 
-}
-
-extension UIView {
-    func dropShadow(scale: Bool = true) {
-        layer.masksToBounds = false
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.2
-        layer.shadowOffset = .zero
-        layer.shadowRadius = 1
-        layer.shouldRasterize = true
-        layer.rasterizationScale = scale ? UIScreen.main.scale : 1
-    }
 }

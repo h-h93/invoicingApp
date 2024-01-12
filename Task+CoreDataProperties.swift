@@ -12,13 +12,13 @@ import CoreData
 
 extension Task {
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Task> {
+    @nonobjc public class func createFetchRequest() -> NSFetchRequest<Task> {
         return NSFetchRequest<Task>(entityName: "Task")
     }
 
-    @NSManaged public var amount: NSDecimalNumber?
-    @NSManaged public var task: String?
-    @NSManaged public var invoice: Invoice?
+    @NSManaged public var amount: NSDecimalNumber
+    @NSManaged public var task: String
+    @NSManaged public var invoice: Invoice
 
 }
 

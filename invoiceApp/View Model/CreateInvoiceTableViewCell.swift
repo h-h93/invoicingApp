@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CreateInvoiceTableViewCell: UITableViewCell {
+class CreateInvoiceTableViewCell: UITableViewCell, UITextFieldDelegate {
     let attributes: [NSAttributedString.Key: Any] = [
         .font: UIFont.systemFont(ofSize: 16),
         .backgroundColor: UIColor.clear,
@@ -25,6 +25,7 @@ class CreateInvoiceTableViewCell: UITableViewCell {
         task.textColor = .black
         task.backgroundColor = .clear
         task.adjustsFontSizeToFitWidth = true
+        task.returnKeyType = .done
         task.setUnderLine()
         return task
     }()
@@ -36,6 +37,7 @@ class CreateInvoiceTableViewCell: UITableViewCell {
         cost.textColor = .black
         cost.backgroundColor = .clear
         cost.adjustsFontSizeToFitWidth = true
+        cost.returnKeyType = .done
         cost.setUnderLine()
         return cost
     }()
@@ -80,13 +82,13 @@ class CreateInvoiceTableViewCell: UITableViewCell {
             taskText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             taskText.leadingAnchor.constraint(equalTo: view.leadingAnchor),
            // taskText.heightAnchor.constraint(equalToConstant: 50),
-            taskText.widthAnchor.constraint(equalToConstant: 150),
+            taskText.widthAnchor.constraint(equalToConstant: 140),
             taskText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
             
             costText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             costText.leadingAnchor.constraint(equalTo: taskText.trailingAnchor, constant: 100),
            // taskText.heightAnchor.constraint(equalToConstant: 50),
-            costText.widthAnchor.constraint(equalToConstant: 150),
+            costText.widthAnchor.constraint(equalToConstant: 140),
             costText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
         ])
     }
