@@ -31,16 +31,15 @@ class DatabaseOperations {
         } catch {
             print("Error creating a new client: \(error.localizedDescription)")
         }
-        
     }
     
     func deleteClient(email: String) {
         let request = Client.createFetchRequest()
         request.predicate = NSPredicate(format: "email ==%@", argumentArray: [email])
-        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         do {
             let results = try context.fetch(request)
             if results.count != 0 {
+                deleteAllInvoices(invoice: results[0].invoice)
                 context.delete(results[0])
             }
             try context.save()
@@ -221,6 +220,26 @@ class DatabaseOperations {
         }
         
         cleanup()
+    }
+    
+    func deleteAllInvoices(invoice: NSSet) {
+        let request = Invoice.createFetchRequest()
+        
+        do {
+            do {
+                let results = try context.fetch(request)
+                if results.count != 0 {
+                    for invoices in results {
+                        context.delete(invoices)
+                    }
+                    try context.save()
+                }
+            } catch {
+                print(error.localizedDescription)
+            }
+            
+            cleanup()
+        }
     }
     
     func cleanup() {

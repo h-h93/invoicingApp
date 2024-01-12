@@ -111,6 +111,7 @@ class InvoiceDetailViewController: UIViewController, UITableViewDelegate, UIText
         }
         NotificationCenter.default.post(name: NSNotification.Name("com.invoiceCreated"), object: nil)
         self.dismiss(animated: true)
+        NotificationCenter.default.post(name: NSNotification.Name("com.updateClient"), object: nil)
     }
     
     @objc func deleteInvoice() {

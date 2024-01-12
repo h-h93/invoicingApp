@@ -24,7 +24,8 @@ class ContactsViewController: UIViewController, UITableViewDelegate, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
+        databaseOperations.cleanup()
+        clients = databaseOperations.fetchClients()
         NotificationCenter.default.addObserver(self, selector: #selector(reloadData), name: NSNotification.Name("com.updateClient"), object: nil)
 
         tableView.delegate = self

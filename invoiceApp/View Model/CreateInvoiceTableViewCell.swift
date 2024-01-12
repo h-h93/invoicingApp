@@ -82,11 +82,11 @@ class CreateInvoiceTableViewCell: UITableViewCell, UITextFieldDelegate {
             taskText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             taskText.leadingAnchor.constraint(equalTo: view.leadingAnchor),
            // taskText.heightAnchor.constraint(equalToConstant: 50),
-            taskText.widthAnchor.constraint(equalToConstant: 150),
+            taskText.widthAnchor.constraint(equalToConstant: 140),
             taskText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
             
             costText.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
-            costText.leadingAnchor.constraint(equalTo: taskText.trailingAnchor, constant: 100),
+            costText.leadingAnchor.constraint(equalTo: taskText.trailingAnchor, constant: 80),
            // taskText.heightAnchor.constraint(equalToConstant: 50),
             costText.widthAnchor.constraint(equalToConstant: 140),
             costText.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10),
