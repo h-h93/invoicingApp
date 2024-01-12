@@ -95,6 +95,7 @@ class CreateClientViewController: UIViewController, UITextFieldDelegate, UIScrol
         ac.addAction(UIAlertAction(title: "Delete", style: .default, handler: { UIAlertAction in
             databaseOperations.deleteClient(email: self.previousEmail)
             NotificationCenter.default.post(name: NSNotification.Name("com.updateClient"), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name("com.updateComplete"), object: nil)
             self.dismiss(animated: true)
         }))
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
